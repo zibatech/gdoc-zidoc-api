@@ -1,5 +1,5 @@
 from flask import Blueprint
 
-zidoc = Blueprint('zidoc', __name__)
+gdoc = Blueprint('gdoc', __name__)
 
 from .endpoints import *

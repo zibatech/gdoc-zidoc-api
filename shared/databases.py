@@ -25,7 +25,7 @@ class GDoc(Database):
   def __init__(self):
     super().__init__({
       'host': env.get('GDOC_DB_HOST'),
-      'database': env.get('GDOC_DB_DATABASE'),
+      'database': env.get('GDOC_DB_NAME'),
       'user': env.get('GDOC_DB_USER'),
       'password': env.get('GDOC_DB_PASSWORD')
     })

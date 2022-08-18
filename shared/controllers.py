@@ -1,9 +1,8 @@
-
-# tiene que heredar de alguna base de datos
-
-class ExpedientesController:
+class Controller: # heredar de una base de datos
 
   def get_clause(self, params):
+    if len(params) == 0:
+      return 1, ()
     params_dict = dict(params)
     clause = ''
     values = []
@@ -19,9 +18,14 @@ class ExpedientesController:
     values = tuple(values)
     return clause, values
 
-  def get(self, params):
+  def get_expedientes(self, params):
     clause, values = self.get_clause(params)
     statement = f'SELECT * FROM expedientes WHERE {clause}'
-    query = self.cursor.execute(statement, values)
-    rows = self.cursor.fetchall()
-    return rows
+    self.cursor.execute(statement, values)
+    return self.cursor.fetchall()
+  
+  def get_documentos(self, params):
+    clause, values = self.get_clause(params)
+    statement = f'SELECT * FROM documentos WHERE {clause}'
+    self.cursor.execute(statement, values)
+    return self.cursor.fetchall()
