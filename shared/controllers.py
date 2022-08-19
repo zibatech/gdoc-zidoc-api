@@ -20,7 +20,10 @@ class Controller: # heredar de una base de datos
 
   def get_expedientes(self, params):
     clause, values = self.get_clause(params)
-    statement = f'SELECT * FROM expedientes WHERE {clause}'
+    statement = f"""
+      SELECT *, CONCAT('/documentos?Expediente=', expedientes.id) AS documentos
+      FROM expedientes WHERE {clause}
+    """
     self.cursor.execute(statement, values)
     return self.cursor.fetchall()
   
