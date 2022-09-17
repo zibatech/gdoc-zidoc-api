@@ -1,12 +1,9 @@
 from flask import request
 from . import gdoc
-from shared.controllers import Controller
-from shared.databases import GDoc
+from core.controller import Controller
+from os import environ as env
 
-class GDocController(Controller, GDoc):
-  pass
-
-controller = GDocController()
+controller = Controller(env['GDOC_DB_URI'])
 
 @gdoc.route('/expedientes', methods=['GET'])
 def get_expedientes():

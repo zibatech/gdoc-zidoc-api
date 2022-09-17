@@ -1,4 +1,4 @@
 Flask==2.2.2
 flaskhmac==1.2.1
-mysql-connector-python==8.0.30
 python-dotenv==0.20.0
+SQLAlchemy==1.4.41

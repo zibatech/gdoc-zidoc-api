@@ -1,12 +1,9 @@
 from flask import request
 from . import zidoc
-from shared.controllers import Controller
-from shared.databases import ZiDoc
+from core.controller import Controller
+from os import environ as env
 
-class ZiDocController(Controller, ZiDoc):
-  pass
-
-controller = ZiDocController()
+controller = Controller(env['ZIDOC_DB_URI'])
 
 @zidoc.route('/expedientes', methods=['GET'])
 def get_expedientes():

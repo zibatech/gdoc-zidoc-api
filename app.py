@@ -11,7 +11,7 @@ from core.constants import SERVER_ERROR_CODE
 load_dotenv()
 
 app = Flask(__name__)
-app.config['HMAC_KEY'] = env.get('HMAC_SECRET_KEY')
+app.config['HMAC_KEY'] = env['HMAC_SECRET_KEY']
 hmac = Hmac(app)
 
 app.register_blueprint(zidoc, url_prefix='/zidoc')
