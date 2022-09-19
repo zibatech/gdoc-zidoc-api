@@ -14,93 +14,88 @@ class Controller:
     self.meta = MetaData(engine)
     self.session = DBSession()
   
-  def query(self, table_name, clause, f_keys = []):
+  def query(self, on, params, foreign_fields = []):
     try:
-      table = Table(table_name, self.meta, autoload=True)
-      result = self.session.query(table, *f_keys).filter_by(**clause)
+      table = Table(on, self.meta, autoload=True)
+      trd_dependencia = Table('trd_dependencia', self.meta, autoload=True)
+      trd_serie = Table('trd_serie', self.meta, autoload=True)
+      trd_subserie = Table('trd_subserie', self.meta, autoload=True)
+      usuarios = Table('usuarios', self.meta, autoload=True)
+
+      ffields = foreign_fields + [
+        concat(
+          trd_dependencia.c.Cod,
+          ' - ',
+          trd_dependencia.c.Nombre
+        ).label('Dependencia'),
+        concat(
+          trd_serie.c.Cod,
+          ' - ',
+          trd_serie.c.Nombre
+        ).label('Serie'),
+        concat(
+          trd_subserie.c.Cod,
+          ' - ',
+          trd_subserie.c.Nombre
+        ).label('SubSerie'),
+        usuarios.c.Nombre.label('Usuario')
+      ]
+      query = self.session.query(table, *ffields).filter_by(**params)
+      
+      result = query \
+        .join(
+          trd_dependencia, 
+          trd_dependencia.c.Cod == table.c.Dependencia, 
+          isouter=True
+        ) \
+        .join(
+          trd_serie,
+          trd_serie.c.Cod == table.c.Serie,
+          isouter=True
+        ) \
+        .join(
+          trd_subserie, 
+          trd_subserie.c.Cod == table.c.SubSerie, 
+          isouter=True
+        ) \
+        .join(
+          usuarios, 
+          usuarios.c.id == table.c.Usuario, 
+          isouter=True
+        )
       return result, table
     except InvalidRequestError as e:
-      return { 'error': True, 'code': 'invalid_query', 'message': str(e) }
+      return {
+        'error': True,
+        'code': 'invalid_query',
+        'message': str(e)
+      }, None
   
   def get_expedientes(self, params):
-    trd_dependencias = Table('trd_dependencias', self.meta, autoload=True)
-    trd_series = Table('trd_series', self.meta, autoload=True)
-    trd_subseries = Table('trd_subseries', self.meta, autoload=True)
-    soportes = Table('soportes', self.meta, autoload=True)
-    unidades_conservacion = Table(
-      'unidades_conservacion',
-      self.meta,
-      autoload=True
-    )
-    result, table = self.query(
-      'expedientes',
-      params,
-      [
-        concat(
-          trd_dependencias.c.codigo,
-          ' - ',
-          trd_dependencias.c.nombre
-        ).label('dependencia'),
-        concat(trd_series.c.codigo, ' - ', trd_series.c.nombre).label('serie'),
-        concat(
-          trd_subseries.c.codigo,
-          ' - ',
-          trd_subseries.c.nombre
-        ).label('subserie'),
-        soportes.c.nombre.label('soporte'),
-        unidades_conservacion.c.nombre.label('unidad_conservacion')
-      ]
-    )
+    result, table = self.query('expedientes', params)
     if type(result) == dict and result.get('error'):
-      return result      
-
-    data = result \
-      .join(
-        trd_dependencias, 
-        trd_dependencias.c.id == table.c.dependencia, 
-        isouter=True
-      ) \
-      .join(
-        trd_series,
-        trd_series.c.id == table.c.serie,
-        isouter=True
-      ) \
-      .join(
-        trd_subseries, 
-        trd_subseries.c.id == table.c.subserie, 
-        isouter=True
-      ) \
-      .join(
-        soportes,
-        soportes.c.id == table.c.soporte,
-        isouter=True
-      ) \
-      .join(
-        unidades_conservacion,
-        unidades_conservacion.c.id == table.c.unidad_conservacion,
-        isouter=True
-      )
-    return { 'ok': True, 'data': [dict(row) for row in data] }
+      return result
+    return { 'ok': True, 'data': [dict(row) for row in result] }
 
   def get_documentos(self, params):
-    trd_tiposdoc = Table('trd_tiposdoc', self.meta, autoload=True)
+    trd_tipodoc = Table('trd_tipodoc', self.meta, autoload=True)
     result, table = self.query(
-      'documentos',
+      'documentos', 
       params,
       [
         concat(
-          trd_tiposdoc.c.codigo,
+          trd_tipodoc.c.Cod,
           ' - ',
-          trd_tiposdoc.c.nombre
-        ).label('tipo_documental')
+          trd_tipodoc.c.Nombre
+        ).label('TipoDoc')
       ]
     )
     if type(result) == dict and result.get('error'):
       return result
     
     data = result.join(
-      trd_tiposdoc,
-      trd_tiposdoc.c.id == table.c.tipo_documental,
+      trd_tipodoc,
+      trd_tipodoc.c.Cod == table.c.TipoDoc,
       isouter=True
-    )
+    )    
     return { 'ok': True, 'data': [dict(row) for row in data] }
