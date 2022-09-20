@@ -1,7 +1,8 @@
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, defer, deferred
 from sqlalchemy.sql.functions import concat
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.exc import InvalidRequestError
+from .constants import EXCLUDED_FROM_DOCUMENTS
 
 class Controller:
 
@@ -16,13 +17,27 @@ class Controller:
   
   def query(self, on, params, foreign_fields = []):
     try:
-      table = Table(on, self.meta, autoload=True)
-      trd_dependencia = Table('trd_dependencia', self.meta, autoload=True)
-      trd_serie = Table('trd_serie', self.meta, autoload=True)
-      trd_subserie = Table('trd_subserie', self.meta, autoload=True)
-      usuarios = Table('usuarios', self.meta, autoload=True)
+      table = Table(on, self.meta, autoload=True)          
+      query = self.session.query(table, *foreign_fields).filter_by(**params)
+      return query, table
+    except InvalidRequestError as e:
+      return {
+        'error': True,
+        'code': 'invalid_query',
+        'message': str(e)
+      }, None
+  
+  # TODO: generar la relacion de consultas
+  def get_expedientes(self, params):
+    trd_dependencia = Table('trd_dependencia', self.meta, autoload=True)
+    trd_serie = Table('trd_serie', self.meta, autoload=True)
+    trd_subserie = Table('trd_subserie', self.meta, autoload=True)
+    usuarios = Table('usuarios', self.meta, autoload=True)
 
-      ffields = foreign_fields + [
+    query, table = self.query(
+      'expedientes',
+      params,
+      [
         concat(
           trd_dependencia.c.Cod,
           ' - ',
@@ -40,41 +55,31 @@ class Controller:
         ).label('SubSerie'),
         usuarios.c.Nombre.label('Usuario')
       ]
-      query = self.session.query(table, *ffields).filter_by(**params)
-      
-      result = query \
-        .join(
-          trd_dependencia, 
-          trd_dependencia.c.Cod == table.c.Dependencia, 
-          isouter=True
-        ) \
-        .join(
-          trd_serie,
-          trd_serie.c.Cod == table.c.Serie,
-          isouter=True
-        ) \
-        .join(
-          trd_subserie, 
-          trd_subserie.c.Cod == table.c.SubSerie, 
-          isouter=True
-        ) \
-        .join(
-          usuarios, 
-          usuarios.c.id == table.c.Usuario, 
-          isouter=True
-        )
-      return result, table
-    except InvalidRequestError as e:
-      return {
-        'error': True,
-        'code': 'invalid_query',
-        'message': str(e)
-      }, None
-  
-  def get_expedientes(self, params):
-    result, table = self.query('expedientes', params)
-    if type(result) == dict and result.get('error'):
-      return result
+    )
+    if type(query) == dict and query.get('error'):
+      return query
+
+    result = query \
+      .join(
+        trd_dependencia, 
+        trd_dependencia.c.id == table.c.Dependencia, 
+        isouter=True
+      ) \
+      .join(
+        trd_serie,
+        trd_serie.c.id == table.c.Serie,
+        isouter=True
+      ) \
+      .join(
+        trd_subserie, 
+        trd_subserie.c.id == table.c.SubSerie, 
+        isouter=True
+      ) \
+      .join(
+        usuarios, 
+        usuarios.c.id == table.c.Usuario, 
+        isouter=True
+      )
     return { 'ok': True, 'data': [dict(row) for row in result] }
 
   def get_documentos(self, params):
@@ -97,5 +102,11 @@ class Controller:
       trd_tipodoc,
       trd_tipodoc.c.Cod == table.c.TipoDoc,
       isouter=True
-    )    
-    return { 'ok': True, 'data': [dict(row) for row in data] }
+    )
+    records = []
+    for row in data:
+      field = dict(row)
+      for key in EXCLUDED_FROM_DOCUMENTS:
+        del field[key]
+      records.append(dict(field))
+    return { 'ok': True, 'data': records }
