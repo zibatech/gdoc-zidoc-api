@@ -109,30 +109,18 @@ class Controller:
     return { 'ok': True, 'data': [dict(row) for row in result] }
 
   def get_documentos(self, params):
-    trd_tipodoc = Table('trd_tipodoc', self.meta, autoload=True)
-    result, table = self.query(
-      'documentos', 
-      params,
-      [
-        concat(
-          trd_tipodoc.c.Cod,
-          ' - ',
-          trd_tipodoc.c.Nombre
-        ).label('TipoDoc')
-      ]
-    )
+    result, table = self.query('documentos', params)
     if type(result) == dict and result.get('error'):
       return result
-    
-    data = result.join(
-      trd_tipodoc,
-      trd_tipodoc.c.Cod == table.c.TipoDoc,
-      isouter=True
-    )
     records = []
-    for row in data:
+    for row in result:
       field = dict(row)
       for key in EXCLUDED_FROM_DOCUMENTS:
         del field[key]
+      tipodoc = field.get('TipoDoc')
+      if tipodoc != "9":
+        tipodoc_res, _ = self.query('trd_tipodoc', { 'Cod': tipodoc })
+        tipodoc_row = dict(tipodoc_res.first())
+        field['TipoDoc'] = f"{tipodoc_row['Cod']} - {tipodoc_row['Nombre']}"      
       records.append(dict(field))
     return { 'ok': True, 'data': records }
