@@ -15,9 +15,9 @@ class Controller:
     self.meta = MetaData(engine)
     self.session = DBSession()
   
-  def query(self, on, params, foreign_fields = []):
+  def query(self, name, params = {}, foreign_fields = []):
     try:
-      table = Table(on, self.meta, autoload=True)          
+      table = Table(name, self.meta, autoload=True)          
       query = self.session.query(table, *foreign_fields).filter_by(**params)
       return query, table
     except InvalidRequestError as e:
@@ -26,17 +26,43 @@ class Controller:
         'code': 'invalid_query',
         'message': str(e)
       }, None
-  
-  # TODO: generar la relacion de consultas
+
   def get_expedientes(self, params):
     trd_dependencia = Table('trd_dependencia', self.meta, autoload=True)
     trd_serie = Table('trd_serie', self.meta, autoload=True)
     trd_subserie = Table('trd_subserie', self.meta, autoload=True)
     usuarios = Table('usuarios', self.meta, autoload=True)
 
+    pasdict = params.to_dict()
+    dependencia = pasdict.get('Dependencia', None)
+    if dependencia:
+      dependencia_id, _ = self.query(
+        'trd_dependencia',
+        { 'Cod': dependencia }
+      )
+      pasdict['Dependencia'] = dict(dependencia_id.first()).get('id')
+    
+    serie = pasdict.get('Serie', None)
+    if serie:
+      clause = { 'Cod': serie }
+      if dependencia:
+        clause['Dependencia'] = dependencia
+      serie_id, _ = self.query('trd_serie', clause)
+      pasdict['Serie'] = dict(serie_id.first()).get('id')
+    
+    subserie = pasdict.get('SubSerie', None)
+    if subserie:
+      clause = { 'Cod': subserie }
+      if serie:
+        clause['Serie'] = serie
+      if dependencia:
+        clause['Dependencia'] = dependencia
+      subserie_id, _ = self.query('trd_subserie', clause)
+      pasdict['SubSerie'] = dict(subserie_id.first()).get('id')
+    
     query, table = self.query(
       'expedientes',
-      params,
+      pasdict,
       [
         concat(
           trd_dependencia.c.Cod,
