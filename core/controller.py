@@ -2,7 +2,7 @@ from sqlalchemy.orm import sessionmaker, defer, deferred
 from sqlalchemy.sql.functions import concat
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.exc import InvalidRequestError
-from .constants import EXCLUDED_FROM_DOCUMENTS
+from .constants import EXCLUDED_FROM_DOCUMENTS, SUCCESS_REQUEST, BAD_REQUEST
 
 class Controller:
 
@@ -15,10 +15,32 @@ class Controller:
     self.meta = MetaData(engine)
     self.session = DBSession()
   
+  def serialize(self, result):
+    return [dict(row) for row in result]
+
+  def response(self, data, status = SUCCESS_REQUEST):
+    ok = status < 400
+    _return = {'ok': ok}
+    if ok:
+      _return['data'] = data
+    else:
+      _return |= data
+    return _return, status
+  
   def query(self, name, params = {}, foreign_fields = []):
     try:
-      table = Table(name, self.meta, autoload=True)          
-      query = self.session.query(table, *foreign_fields).filter_by(**params)
+      table = Table(name, self.meta, autoload=True)
+      params_copy = params.copy()
+      aslike = []
+      for param in params:
+        if param.startswith('%'):
+          value = params_copy.pop(param)
+          field = param.replace('%', '')
+          column = table.c[field]
+          aslike.append(column.ilike(f'%{value}'))
+      query = self.session.query(table, *foreign_fields) \
+        .filter_by(**params_copy) \
+        .filter(*aslike)
       return query, table
     except InvalidRequestError as e:
       return {
@@ -106,10 +128,13 @@ class Controller:
         usuarios.c.id == table.c.Usuario, 
         isouter=True
       )
-    return { 'ok': True, 'data': [dict(row) for row in result] }
+    return self.response(self.serialize(result))
 
   def get_documentos(self, params):
-    result, table = self.query('documentos', params)
+    params_dict = params.to_dict()
+    if 'Asunto' in params_dict:
+      params_dict['%Asunto'] = params_dict.pop('Asunto')
+    result, table = self.query('documentos', params_dict)
     if type(result) == dict and result.get('error'):
       return result
     records = []
@@ -123,4 +148,90 @@ class Controller:
         tipodoc_row = dict(tipodoc_res.first())
         field['TipoDoc'] = f"{tipodoc_row['Cod']} - {tipodoc_row['Nombre']}"      
       records.append(dict(field))
-    return { 'ok': True, 'data': records }
+    return self.response(records)
+
+  def get_dependencias(self):
+    query, table = self.query('trd_dependencia')
+    rows = self.serialize(query)
+    result = []
+    for row in rows:
+      result.append({
+        'id': row['id'],
+        'codigo': row['Cod'],
+        'nombre': row['Nombre']
+      })
+    return self.response(result)
+
+  def get_series(self, params):
+    dependencia = params.get('dependencia')
+    if not dependencia:
+      return self.response(
+        {'message': 'Dependencia no especificada.'},
+        BAD_REQUEST
+      )
+    query, table = self.query(
+      'trd_serie',
+      { 'Dependencia': dependencia }
+    )
+    rows = self.serialize(query)
+    result = []
+    for row in rows:
+      result.append({
+        'id': row['id'],
+        'codigo': row['Cod'],
+        'nombre': row['Nombre']
+      })
+    return self.response(result)
+  
+  def get_subseries(self, params):
+    clause = {}
+    dependencia = params.get('dependencia')
+    serie = params.get('serie')
+    if dependencia:
+      clause['Dependencia'] = dependencia
+    if serie:
+      clause['Serie'] = serie
+    if len(clause) == 0:
+      return self.response({
+        'message': 'No se ha especificado dependencia y/o serie.'
+      })
+    query, _ = self.query('trd_subserie', clause)
+    rows = self.serialize(query)
+    result = []
+    for row in rows:
+      result.append({
+        'id': row['id'],
+        'codigo': row['Cod'],
+        'nombre': row['Nombre']
+      })
+    return self.response(result)
+  
+  def get_tiposdoc(self, params):
+    clause = {}
+    dependencia = params.get('dependencia')
+    serie = params.get('serie')
+    subserie = params.get('subserie')
+    if dependencia:
+      clause['Dependencia'] = dependencia
+    if serie:
+      clause['Serie'] = serie
+    if subserie:
+      clause['Subserie'] = subserie
+    if len(clause) == 0:
+      return self.response({
+        'message': 'No se ha especificado dependencia y/o serie y/o subserie.'
+      })
+    query, _ = self.query('trd_tipodoc', clause)
+    rows = self.serialize(query)
+    result = []
+    for row in rows:
+      result.append({ 'codigo': row['Cod'], 'nombre': row['Nombre'] })
+    return self.response(result)
+  
+  def get_usuarios(self):
+    query, _ = self.query('usuarios')
+    rows = self.serialize(query)
+    result = []
+    for row in rows:
+      result.append({ 'id': row['id'], 'nombre': row['Nombre'] })
+    return self.response(result)
