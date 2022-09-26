@@ -70,6 +70,10 @@ Ahora si empecemos con las peticiones, podremos consultar *expedientes* y *docum
 #### Documentos
 - **`Expediente(INT(11), 'Expediente')`**: -
 - **`NumeroRadicado(VARCHAR(20), 'Radicado')`:** ``<input type="text" name="NumeroRadicado"/>``
+- **`Dependencia(INT(11), 'Dependencia')`** :  `<option value="<id>"><codigo> - <nombre></option>`
+ - **`Serie(INT(11), 'Serie')`**:  `<option value="<id>"><codigo> - <nombre></option>`
+ - **`SubSerie(INT(11), 'Subserie')`**:  `<option value="<id>"><codigo> - <nombre></option>`
+- **`TipoDoc(INT(11), 'Tipo documental')`**:  `<option value="<codigo>"><codigo> - <nombre></option>`
 - **`TipoDoc(VARCHAR(5), 'Tipo documental')`:** `<option value="<codigo>"><codigo> - <nombre></option>`
 - **`Asunto(VARCHAR(500), 'Asunto')`:** ``<input type="text" name="Asunto"/>``
 - **`numero(TEXT, 'Número')`:** ``<input type="text" name="numero"/>``
