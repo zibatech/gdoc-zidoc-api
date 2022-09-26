@@ -3,7 +3,7 @@ Servicio que integra los registros de *ZiDoc*, aplicativo de la entidad CRA, con
 ## Requisitos
 
  - Docker
- - Base de datos de *ZiDoc*
+ - Base de datos de *ZiDoc* montada
 
 ## Instalación
 El servicio se encuentra dockerizado, por ende lo único que tenemos que hacer es cambiar los valores de las variables de entorno necesarias y ejecutar los comandos de ***[Docker](https://www.docker.com/)*** respectivos. A continuación, las variables de entorno a configurar:
@@ -49,37 +49,37 @@ Ahora si empecemos con las peticiones, podremos consultar *expedientes* y *docum
 
  - **`Fecha (DATE, 'Fecha')`**:  ``<input type="date" name="Fecha"/>``
  - **`Usuario(INT(11), 'Usuario')`**:  `<option value="<id>"><nombre></option>`
- - **`NumeroExpediente(VARCHAR(50), 'Numero de expediente')`**:  ``<input type="text" name="NumeroExpediente"/>``
- - **`Dependencia(INT(11), 'Dependencia')`** :  `<option value="<id>"><codigo> - <nombre></option>`
- - **`Serie(INT(11), 'Serie')`**:  `<option value="<id>"><codigo> - <nombre></option>`
- - **`SubSerie(INT(11), 'Subserie')`**:  `<option value="<id>"><codigo> - <nombre></option>`
- - **`FechaExtInicial(DATE, 'Fecha extrema inicial')`:**  ``<input type="date" name="FechaExtInicial"/>``
- - **`FechaExtFinal(DATE, 'Fecha extrema final')`**:  ``<input type="date" name="FechaExtFinal"/>``
- - **`Caja(VARCHAR(10), 'Caja')`**:  ``<input type="text" name="Caja"/>``
- - **`Carpeta(VARCHAR(50), 'Carpeta')`**:  ``<input type="text" name="Carpeta"/>``
- - **`Tomo(VARCHAR(50), 'Tomo')`**:  ``<input type="text" name="Tomo"/>``
+ - **`NumeroExpediente (VARCHAR(50), 'Numero de expediente')`**:  ``<input type="text" name="NumeroExpediente"/>``
+ - **`Dependencia (INT(11), 'Dependencia')`** :  `<option value="<id>"><codigo> - <nombre></option>`
+ - **`Serie (INT(11), 'Serie')`**:  `<option value="<id>"><codigo> - <nombre></option>`
+ - **`SubSerie (INT(11), 'Subserie')`**:  `<option value="<id>"><codigo> - <nombre></option>`
+ - **`FechaExtInicial (DATE, 'Fecha extrema inicial')`:**  ``<input type="date" name="FechaExtInicial"/>``
+ - **`FechaExtFinal (DATE, 'Fecha extrema final')`**:  ``<input type="date" name="FechaExtFinal"/>``
+ - **`Caja (VARCHAR(10), 'Caja')`**:  ``<input type="text" name="Caja"/>``
+ - **`Carpeta (VARCHAR(50), 'Carpeta')`**:  ``<input type="text" name="Carpeta"/>``
+ - **`Tomo (VARCHAR(50), 'Tomo')`**:  ``<input type="text" name="Tomo"/>``
  - **`Otro (VARCHAR(50), 'Otro')`**:  ``<input type="text" name="Otro"/>``
- - **`NumeroFolios(DATE, 'NumeroFolios')`**:  ``<input type="number" name="NumeroFolios"/>``
- - **`Soporte(VARCHAR(50), 'Soporte')`**:  ``<input type="text" name="Soporte"/>``
- - **`ReferenciaDoc(DATE, 'Referencia de documentos')`**:  ``<input type="text" name="ReferenciaDoc"/>``
- - **`ConsecutivoInicial(INT(20), 'Consecutivo inicial')`**:  ``<input type="number" name="ConsecutivoInicial"/>``
- - **`ConsecutivoFinal(INT(20), 'Consecutivo final')`**:  ``<input type="number" name="ConsecutivoFinal"/>``
- - **`cedula_NIT(TEXT, 'Cédula/NIT')`**:  ``<input type="text" name="cedula_NIT"/>``
- - **`nombre_expediente(TEXT, 'Nombre')`**:  ``<input type="text" name="nombre_expediente"/>``
+ - **`NumeroFolios (DATE, 'NumeroFolios')`**:  ``<input type="number" name="NumeroFolios"/>``
+ - **`Soporte (VARCHAR(50), 'Soporte')`**:  ``<input type="text" name="Soporte"/>``
+ - **`ReferenciaDoc (DATE, 'Referencia de documentos')`**:  ``<input type="text" name="ReferenciaDoc"/>``
+ - **`ConsecutivoInicial (INT(20), 'Consecutivo inicial')`**:  ``<input type="number" name="ConsecutivoInicial"/>``
+ - **`ConsecutivoFinal (INT(20), 'Consecutivo final')`**:  ``<input type="number" name="ConsecutivoFinal"/>``
+ - **`cedula_NIT (TEXT, 'Cédula/NIT')`**:  ``<input type="text" name="cedula_NIT"/>``
+ - **`nombre_expediente (TEXT, 'Nombre')`**:  ``<input type="text" name="nombre_expediente"/>``
 
 #### Documentos
-- **`Expediente(INT(11), 'Expediente')`**: -
-- **`NumeroRadicado(VARCHAR(20), 'Radicado')`:** ``<input type="text" name="NumeroRadicado"/>``
-- **`Dependencia(INT(11), 'Dependencia')`** :  `<option value="<id>"><codigo> - <nombre></option>`
- - **`Serie(INT(11), 'Serie')`**:  `<option value="<id>"><codigo> - <nombre></option>`
- - **`SubSerie(INT(11), 'Subserie')`**:  `<option value="<id>"><codigo> - <nombre></option>`
-- **`TipoDoc(INT(11), 'Tipo documental')`**:  `<option value="<codigo>"><codigo> - <nombre></option>`
-- **`TipoDoc(VARCHAR(5), 'Tipo documental')`:** `<option value="<codigo>"><codigo> - <nombre></option>`
-- **`Asunto(VARCHAR(500), 'Asunto')`:** ``<input type="text" name="Asunto"/>``
-- **`numero(TEXT, 'Número')`:** ``<input type="text" name="numero"/>``
-- **`ConsecutivoIniDoc(VARCHAR(15), 'Consecutivo inicial')`** ``<input type="text" name="ConsecutivoIniDoc"/>``
-- **`ConsecutivoFinDoc(VARCHAR(15), 'Consecutivo final')`** ``<input type="text" name="ConsecutivoFinDoc"/>``
-- **`FechaDoc`:** ``<input type="date" name="FechaDoc"/>``
+- **`Expediente (INT(11), 'Expediente')`**: -
+- **`NumeroRadicado (VARCHAR(20), 'Radicado')`:** ``<input type="text" name="NumeroRadicado"/>``
+- **`Dependencia (INT(11), 'Dependencia')`** :  `<option value="<id>"><codigo> - <nombre></option>`
+ - **`Serie (INT(11), 'Serie')`**:  `<option value="<id>"><codigo> - <nombre></option>`
+ - **`SubSerie (INT(11), 'Subserie')`**:  `<option value="<id>"><codigo> - <nombre></option>`
+- **`TipoDoc (INT(11), 'Tipo documental')`**:  `<option value="<codigo>"><codigo> - <nombre></option>`
+- **`TipoDoc (VARCHAR(5), 'Tipo documental')`:** `<option value="<codigo>"><codigo> - <nombre></option>`
+- **`Asunto (VARCHAR(500), 'Asunto')`:** ``<input type="text" name="Asunto"/>``
+- **`numero (TEXT, 'Número')`:** ``<input type="text" name="numero"/>``
+- **`ConsecutivoIniDoc (VARCHAR(15), 'Consecutivo inicial')`** ``<input type="text" name="ConsecutivoIniDoc"/>``
+- **`ConsecutivoFinDoc (VARCHAR(15), 'Consecutivo final')`** ``<input type="text" name="ConsecutivoFinDoc"/>``
+- **`FechaDoc (DATE, 'Fecha')`:** ``<input type="date" name="FechaDoc"/>``
 
 Estos serían todos los campos por los que podemos filtrar nuestras consultas. Dentro de estos tenemos casos especiales (**`Usuario`**, **`Dependencia`**, **`Serie`**, **`SubSerie`**), ya que la equivalencia en **`html`** de estos es una lista desplegable donde las opciones son generadas por la iteracion sobre los registros que nos retornan los **`endpoints`** respectivos para cada uno y el valor de cada una de estas tiene que ser el **`id`** de dichos registros retornados, a continuación un ejemplo con **`php`**:
 ```php
