@@ -83,7 +83,7 @@ Ahora si empecemos con las peticiones, podremos consultar *expedientes* y *docum
 - **`ConsecutivoFinDoc (VARCHAR(15), 'Consecutivo final')`** ``<input type="text" name="ConsecutivoFinDoc"/>``
 - **`FechaDoc (DATE, 'Fecha')`:** ``<input type="date" name="FechaDoc"/>``
 
-Estos serían todos los campos por los que podemos filtrar nuestras consultas. Dentro de estos tenemos casos especiales (**`Usuario`**, **`Dependencia`**, **`Serie`**, **`SubSerie`** y **`TipoDoc`**), ya que la equivalencia en **`html`** de estos es una lista desplegable donde las opciones son generadas por la iteracion sobre los registros que nos retornan los **`endpoints`** respectivos para cada uno y el valor de cada una de estas tiene que ser el **`id`** de dichos registros retornados, a continuación un ejemplo con **`php`**:
+Estos serían todos los campos por los que podemos filtrar nuestras consultas. Dentro de estos tenemos casos especiales (**`Usuario`**, **`Dependencia`**, **`Serie`**, **`SubSerie`** y **`TipoDoc`**), ya que la equivalencia en **`html`** de estos es una lista desplegable donde las opciones son generadas por la iteracion sobre los registros que nos retornan los **`endpoints`** respectivos para cada uno y el valor de cada una de estas tiene que ser el **`id`** (excepto para **`TipoDoc`**) de dichos registros retornados, a continuación un ejemplo con **`php`**:
 ```php
 $dependencias = [...]; // dependencias retornadas
 foreach ($dependencia as $dependencias) {
@@ -162,6 +162,10 @@ $ curl -H 'Signature: <llave>' <host>:<puerto>/api/subseries?dependencia=19&seri
 ### Expedientes
 
 #### Respuesta general
+```
+HTTP/1.1 200 OK
+Content-type: application/json
+```
 ```json
 {
    "ok": true,
@@ -208,23 +212,27 @@ $ curl -H 'Signature: <llave>' <host>:<puerto>/api/expedientes
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/expedientes?Dependencia=7
 ```
 
-### De la dependencia con id=7 y código=130 y subserie con id=4 y código=21
+### De la dependencia con id=7 y código=130 y serie con id=4 y código=21
 
 ``POST /api/expedientes?Dependencia=7&Serie=4`` 
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/expedientes?Dependencia=7&Serie=4
 ```
- ### De la dependencia 130, serie 55 y subserie 01
+ ### De la dependencia con id=7 y código=130, serie con id=4 y código=21 y subserie con id=11 y código=55
 
-``POST /api/expedientes?Dependencia=130&Serie=55&SubSerie=01`` 
+``POST /api/expedientes?Dependencia=7&Serie=4&SubSerie=11`` 
 ```bash
-$ curl -H 'Signature: <llave>' <host>:<puerto>/api/expedientes?Dependencia=130&Serie=55&SubSerie=01
+$ curl -H 'Signature: <llave>' <host>:<puerto>/api/expedientes?Dependencia=7&Serie=4&SubSerie=11
 ```
 
 ### Documentos
 Debido a la gran cantidad de registros, la ausencia de relaciones a nivel de base de datos y la inexistencia de *"índices"* de una tabla en otra, no se pudo cambiar la estructura de la tablas **`documentos`** , por lo que la consulta de *documentos* por *dependencia*, *serie*, *subserie* y *tipos documentales*  sigue siendo por código.
 
 #### Respuesta general
+```
+HTTP/1.1 200 OK
+Content-type: application/json
+```
 ```json
 {
    "ok": true,
@@ -263,7 +271,7 @@ $ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos
 
 ``POST /api/documentos?Dependencia=130`` 
 ```bash
-$ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos?Dependencia=7
+$ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos?Dependencia=130
 ```
 
 ### De la dependencia con código=160 y serie con código=11
@@ -279,11 +287,11 @@ $ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos?Dependencia=160&Se
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos?Dependencia=120&Serie=51&SubSerie=01
 ```
 
-### De la dependencia con código=190 y tipo documental con código=10
+### De la dependencia con código=190, serie con código=57, subserie con código=61 y tipo documental con código=41
 
-``POST /api/documentos?Dependencia=190&TipoDoc=10`` 
+``POST /api/documentos?Dependencia=190&Serie=57&SubSerie=61&TipoDoc=41`` 
 ```bash
-$ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos?Dependencia=190&TipoDoc=10
+$ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos?Dependencia=190&Serie=57&SubSerie=61&TipoDoc=41
 ```
 
 Ese sería el proceso a través del cuál podemos integral *ZiDoc* con terceros.
