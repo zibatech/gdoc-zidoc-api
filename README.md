@@ -19,7 +19,7 @@ DB_URI=mysql://zidocusuario:supersecretpwd@host.docker.internal:3306/zidoc_cra
 # Secret keys
 HMAC_SECRET_KEY=fR2i/-]qFP:%y=kE~mYq5=l@+z;T)
 ```
-> **host.docker.internal**
+> **host.docker.internal: **
 > Este valor se usa para acceder a la red local del host desde el contenedor.
 
 Hecho esto ya podremos continuar con la construcción de la imagen, ejecutando lo siguiente en la raíz del proyecto:
