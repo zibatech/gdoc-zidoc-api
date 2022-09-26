@@ -21,8 +21,27 @@ def get_expedientes():
 
 @app.route('/api/documentos', methods=['GET'])
 def get_documentos():
-  # TODO: revisar estados de respuesta
   return controller.get_documentos(request.args)
+
+@app.route('/api/usuarios', methods=['GET'])
+def get_usuarios():
+  return controller.get_usuarios()
+
+@app.route('/api/dependencias', methods=['GET'])
+def get_dependencias():
+  return controller.get_dependencias()
+
+@app.route('/api/series', methods=['GET'])
+def get_series():
+  return controller.get_series(request.args)
+
+@app.route('/api/subseries', methods=['GET'])
+def get_subseries():
+  return controller.get_subseries(request.args)
+
+@app.route('/api/tipos-documentales', methods=['GET'])
+def get_tiposdoc():
+  return controller.get_tiposdoc(request.args)
 
 @app.before_request
 def hmac_validation():
