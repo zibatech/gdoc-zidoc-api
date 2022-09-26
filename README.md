@@ -14,11 +14,14 @@ El servicio se encuentra dockerizado, por ende lo único que tenemos que hacer e
 Una vez configuradas las variables de entorno, tendremos algo como lo siguiente:
 ```env
 # Database
-DB_URI=mysql://zidocdbadmin:Jas8123jdAS1!13$12@localhost:3306/zidoc_cra
+DB_URI=mysql://zidocusuario:supersecretpwd@host.docker.internal:3306/zidoc_cra
 
 # Secret keys
 HMAC_SECRET_KEY=fR2i/-]qFP:%y=kE~mYq5=l@+z;T)
 ```
+> **host.docker.internal**
+> Este valor se usa para acceder a la red local del host desde el contenedor.
+
 Hecho esto ya podremos continuar con la construcción de la imagen, ejecutando lo siguiente en la raíz del proyecto:
 ```bash
 $ docker build . -t <nombre>
