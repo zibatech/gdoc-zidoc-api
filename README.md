@@ -3,7 +3,7 @@ Servicio que integra los registros de *ZiDoc*, aplicativo de la entidad CRA, con
 ## Requisitos
 
  - Docker
- - Base de datos de *ZiDoc* montada
+ - Base de datos de *ZiDoc*
 
 ## Instalación
 El servicio se encuentra dockerizado, por ende lo único que tenemos que hacer es cambiar los valores de las variables de entorno necesarias y ejecutar los comandos de ***[Docker](https://www.docker.com/)*** respectivos. A continuación, las variables de entorno a configurar:
