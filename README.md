@@ -48,7 +48,7 @@ Ahora si empecemos con las peticiones, podremos consultar *expedientes* y *docum
 #### Expedientes
 
  - **`Fecha (DATE, 'Fecha')`**:  ``<input type="date" name="Fecha"/>``
- - **`Usuario(INT(11), 'Usuario')`**:  `<option value="<id>"><nombre></option>`
+ - **`Usuario (INT(11), 'Usuario')`**:  `<option value="<id>"><nombre></option>`
  - **`NumeroExpediente (VARCHAR(50), 'Numero de expediente')`**:  ``<input type="text" name="NumeroExpediente"/>``
  - **`Dependencia (INT(11), 'Dependencia')`** :  `<option value="<id>"><codigo> - <nombre></option>`
  - **`Serie (INT(11), 'Serie')`**:  `<option value="<id>"><codigo> - <nombre></option>`
