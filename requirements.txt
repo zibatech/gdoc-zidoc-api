@@ -2,3 +2,4 @@ Flask==2.2.2
 flaskhmac==1.2.1
 python-dotenv==0.20.0
 SQLAlchemy==1.4.41
+mysqlclient==2.1.1
