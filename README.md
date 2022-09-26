@@ -86,7 +86,7 @@ Ahora si empecemos con las peticiones, podremos consultar *expedientes* y *docum
 Estos serían todos los campos por los que podemos filtrar nuestras consultas. Dentro de estos tenemos casos especiales (**`Usuario`**, **`Dependencia`**, **`Serie`**, **`SubSerie`** y **`TipoDoc`**), ya que la equivalencia en **`html`** de estos es una lista desplegable donde las opciones son generadas por la iteracion sobre los registros que nos retornan los **`endpoints`** respectivos para cada uno y el valor de cada una de estas tiene que ser el **`id`** (excepto para **`TipoDoc`**) de dichos registros retornados, a continuación un ejemplo con **`php`**:
 ```php
 $dependencias = [...]; // dependencias retornadas
-foreach ($dependencia as $dependencias) {
+foreach ($dependencias as $dependencia) {
   echo "<option value='$dependencia[id]'>$dependencia[codigo] - $dependencia[nombre]</option>";
 }
 ```
