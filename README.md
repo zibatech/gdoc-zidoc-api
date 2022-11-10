@@ -17,7 +17,7 @@ Una vez configuradas las variables de entorno, tendremos algo como lo siguiente:
 DB_URI=mysql://zidocusuario:supersecretpwd@host.docker.internal:3306/zidoc_cra
 
 # Secret keys
-HMAC_SECRET_KEY=fR2i/-]qFP:%y=kE~mYq5=l@+z;T)
+HMAC_SECRET_KEY=supersecrethmackey
 ```
 > **host.docker.internal**: este valor se usa para acceder a la red local del *host* desde el contenedor.
 
@@ -27,7 +27,7 @@ $ docker build . -t <nombre>
 ```
 Construida la imagen, procedemos a correrla con:
 ```bash
-$ docker run -d -p <puerto>:<puerto> --name <nombre_contenedor> <nombre>
+$ docker run -d -p <puerto>:5000 --name <nombre_contenedor> <nombre>
 ```
 En este punto ya tenemos nuestro servicio corriendo en el puerto que se especifique, ahora vamos con la generación de la llave que se usará para la autorización. Lo primero que tenemos que hacer es acceder a la terminal del contenedor, ejecutando:
 ```bash
@@ -114,33 +114,33 @@ Content-type: application/json
 
 ### Dependencias
 #### Todas
-``POST /api/dependencias``
+``GET /api/dependencias``
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/dependencias
 ```
 
 ### Series
 #### Todas
-``POST /api/series``
+``GET /api/series``
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/series
 ```
 #### De la dependencia con id=1 y código=100
 Ten en cuenta que cuando se hacen este tipo de filtros se debe especificar la *dependencia*, *serie* o *subserie* por el **`id`** obtenido del proceso previamente descrito y no por el código de esta.
 
-``POST /api/series?dependencia=1``
+``GET /api/series?dependencia=1``
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/series?dependencia=1
 ```
 ### Subseries
 #### Todas
-``POST /api/subseries``
+``GET /api/subseries``
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/subseries
 ```
 #### De la dependencia con id=1 y código=100 y serie con id=5 y código=55
 
-``POST /api/subseries?dependencia=1&serie=5``
+``GET /api/subseries?dependencia=1&serie=5``
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/subseries?dependencia=1&serie=5
 ```
@@ -148,13 +148,13 @@ $ curl -H 'Signature: <llave>' <host>:<puerto>/api/subseries?dependencia=1&serie
 ### Tipos documentales
 
 #### Todos
-``POST /api/tipos-documentales``
+``GET /api/tipos-documentales``
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/tipos-documentales
 ```
 #### De la dependencia con id=9 y código=140 y serie con id=11 y código=71
 
-``POST /api/subseries?dependencia=9&serie=11``
+``GET /api/subseries?dependencia=9&serie=11``
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/subseries?dependencia=19&serie=11
 ```
@@ -171,27 +171,27 @@ Content-type: application/json
    "ok": true,
    "data": [
      {
-       "Caja": ...,
-	   "Carpeta": ...,
-	   "ConsecutivoFinal": ...,
-	   "ConsecutivoInicial": ...,
-	   "Dependencia": ...,
-	   "FUID": ...,
-	   "Fecha": ....,
-	   "FechaExtFinal": ...,
-	   "FechaExtInicial": ...,
-	   "Notas": ...,
-	   "NumeroExpediente": ...,
-	   "NumeroFolios": ...,
-	   "Otro": ...,
-	   "ReferenciaDoc": ...,
-	   "Soporte": ...,
-	   "SubSerie": ...,
-	   "Tomo": ...,
-	   "Usuario": ...,
-	   "cedula_NIT": ...,
-	   "id": ...,
-	   "nombre_expediente": ...
+        "Caja": ...,
+        "Carpeta": ...,
+        "ConsecutivoFinal": ...,
+        "ConsecutivoInicial": ...,
+        "Dependencia": ...,
+        "FUID": ...,
+        "Fecha": ....,
+        "FechaExtFinal": ...,
+        "FechaExtInicial": ...,
+        "Notas": ...,
+        "NumeroExpediente": ...,
+        "NumeroFolios": ...,
+        "Otro": ...,
+        "ReferenciaDoc": ...,
+        "Soporte": ...,
+        "SubSerie": ...,
+        "Tomo": ...,
+        "Usuario": ...,
+        "cedula_NIT": ...,
+        "id": ...,
+        "nombre_expediente": ...
      },
      ... // demás registros
   ]  
@@ -200,27 +200,27 @@ Content-type: application/json
 
 ### Todos
 
-``POST /api/expedientes`` 
+``GET /api/expedientes`` 
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/expedientes
 ```
 
 ### De la dependencia con id=7 y código=130
 
-``POST /api/expedientes?Dependencia=7`` 
+``GET /api/expedientes?Dependencia=7`` 
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/expedientes?Dependencia=7
 ```
 
 ### De la dependencia con id=7 y código=130 y serie con id=4 y código=21
 
-``POST /api/expedientes?Dependencia=7&Serie=4`` 
+``GET /api/expedientes?Dependencia=7&Serie=4`` 
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/expedientes?Dependencia=7&Serie=4
 ```
  ### De la dependencia con id=7 y código=130, serie con id=4 y código=21 y subserie con id=11 y código=55
 
-``POST /api/expedientes?Dependencia=7&Serie=4&SubSerie=11`` 
+``GET /api/expedientes?Dependencia=7&Serie=4&SubSerie=11`` 
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/expedientes?Dependencia=7&Serie=4&SubSerie=11
 ```
@@ -262,34 +262,34 @@ Content-type: application/json
 
 ### Todos
 
-``POST /api/documentos`` 
+``GET /api/documentos`` 
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos
 ```
 
 ### De la dependencia con código=130
 
-``POST /api/documentos?Dependencia=130`` 
+``GET /api/documentos?Dependencia=130`` 
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos?Dependencia=130
 ```
 
 ### De la dependencia con código=160 y serie con código=11
 
-``POST /api/documentos?Dependencia=160&Serie=11`` 
+``GET /api/documentos?Dependencia=160&Serie=11`` 
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos?Dependencia=160&Serie=11
 ```
  ### De la dependencia con código=120, serie con código=51 y subserie con código=01
 
-``POST /api/documentos?Dependencia=120&Serie=51&SubSerie=01`` 
+``GET /api/documentos?Dependencia=120&Serie=51&SubSerie=01`` 
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos?Dependencia=120&Serie=51&SubSerie=01
 ```
 
 ### De la dependencia con código=190, serie con código=57, subserie con código=61 y tipo documental con código=41
 
-``POST /api/documentos?Dependencia=190&Serie=57&SubSerie=61&TipoDoc=41`` 
+``GET /api/documentos?Dependencia=190&Serie=57&SubSerie=61&TipoDoc=41`` 
 ```bash
 $ curl -H 'Signature: <llave>' <host>:<puerto>/api/documentos?Dependencia=190&Serie=57&SubSerie=61&TipoDoc=41
 ```
