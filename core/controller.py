@@ -10,7 +10,7 @@ class Controller:
   meta = None
 
   def __init__(self, uri):
-    engine = create_engine(uri)
+    engine = create_engine(uri, pool_recycle=3600, pool_pre_ping=True)
     DBSession = sessionmaker(bind=engine)
     self.meta = MetaData(engine)
     self.session = DBSession()
@@ -54,34 +54,7 @@ class Controller:
     trd_serie = Table('trd_serie', self.meta, autoload=True)
     trd_subserie = Table('trd_subserie', self.meta, autoload=True)
     usuarios = Table('usuarios', self.meta, autoload=True)
-
     pasdict = params.to_dict()
-    dependencia = pasdict.get('Dependencia', None)
-    if dependencia:
-      dependencia_id, _ = self.query(
-        'trd_dependencia',
-        { 'Cod': dependencia }
-      )
-      pasdict['Dependencia'] = dict(dependencia_id.first()).get('id')
-    
-    serie = pasdict.get('Serie', None)
-    if serie:
-      clause = { 'Cod': serie }
-      if dependencia:
-        clause['Dependencia'] = dependencia
-      serie_id, _ = self.query('trd_serie', clause)
-      pasdict['Serie'] = dict(serie_id.first()).get('id')
-    
-    subserie = pasdict.get('SubSerie', None)
-    if subserie:
-      clause = { 'Cod': subserie }
-      if serie:
-        clause['Serie'] = serie
-      if dependencia:
-        clause['Dependencia'] = dependencia
-      subserie_id, _ = self.query('trd_subserie', clause)
-      pasdict['SubSerie'] = dict(subserie_id.first()).get('id')
-    
     query, table = self.query(
       'expedientes',
       pasdict,
@@ -211,16 +184,16 @@ class Controller:
     dependencia = params.get('dependencia')
     serie = params.get('serie')
     subserie = params.get('subserie')
+    if len(clause) == 0:
+      return self.response({
+        'message': 'No se ha especificado dependencia y/o serie y/o subserie.'
+      })
     if dependencia:
       clause['Dependencia'] = dependencia
     if serie:
       clause['Serie'] = serie
     if subserie:
       clause['Subserie'] = subserie
-    if len(clause) == 0:
-      return self.response({
-        'message': 'No se ha especificado dependencia y/o serie y/o subserie.'
-      })
     query, _ = self.query('trd_tipodoc', clause)
     rows = self.serialize(query)
     result = []
