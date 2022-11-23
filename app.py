@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from flask import Flask, request
 from flask_hmac import Hmac
 from flask_hmac.exceptions import HmacException
+from sqlalchemy.pool import NullPool
+
 from core.controller import Controller
 from core.constants import SERVER_ERROR_CODE
 
@@ -11,6 +13,11 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['HMAC_KEY'] = env['HMAC_SECRET_KEY']
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+  'pool_pre_ping': True,
+  'pool_recycle': 3600,
+  'pool_class': NullPool
+}
 hmac = Hmac(app)
 
 controller = Controller(env['DB_URI'])
