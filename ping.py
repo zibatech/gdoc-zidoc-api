@@ -11,5 +11,5 @@ while True:
     )
     if request.ok:
         print(f'ping #{i}')
-    sleep(60)
+    sleep(600)
     i += 1
