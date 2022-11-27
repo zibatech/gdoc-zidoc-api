@@ -7,7 +7,7 @@ from flask_hmac import Hmac
 from flask_hmac.exceptions import HmacException
 
 from core.constants import SERVER_ERROR_CODE
-from core.controller import Controller
+from core import controllers
 
 load_dotenv()
 
@@ -15,42 +15,47 @@ app = Flask(__name__)
 app.config['HMAC_KEY'] = env['HMAC_SECRET_KEY']
 hmac = Hmac(app)
 
-controller = Controller(env['DB_URI'])
-
-
-@app.route('/api/expedientes', methods=['GET'])
-def get_expedientes():
-    return controller.get_expedientes(request.args)
-
-
-@app.route('/api/documentos', methods=['GET'])
-def get_documentos():
-    return controller.get_documentos(request.args)
-
-
-@app.route('/api/usuarios', methods=['GET'])
-def get_usuarios():
-    return controller.get_usuarios()
-
 
 @app.route('/api/dependencias', methods=['GET'])
 def get_dependencias():
-    return controller.get_dependencias()
+    controller = controllers.DependenciasController()
+    return controller.get()
 
 
 @app.route('/api/series', methods=['GET'])
 def get_series():
-    return controller.get_series(request.args)
+    controller = controllers.SeriesController()
+    return controller.get(request.args)
 
 
 @app.route('/api/subseries', methods=['GET'])
 def get_subseries():
-    return controller.get_subseries(request.args)
+    controller = controllers.SubseriesController()
+    return controller.get(request.args)
 
 
 @app.route('/api/tipos-documentales', methods=['GET'])
 def get_tiposdoc():
-    return controller.get_tiposdoc(request.args)
+    controller = controllers.TiposDocController()
+    return controller.get(request.args)
+
+
+@app.route('/api/expedientes', methods=['GET'])
+def get_expedientes():
+    controller = controllers.ExpedientesController()
+    return controller.get(request.args)
+
+
+@app.route('/api/documentos', methods=['GET'])
+def get_documentos():
+    controller = controllers.DocumentosController()
+    return controller.get(request.args)
+
+
+@app.route('/api/usuarios', methods=['GET'])
+def get_usuarios():
+    controller = controllers.UsuariosController()
+    return controller.get()
 
 
 @app.before_request

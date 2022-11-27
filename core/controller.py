@@ -1,29 +1,31 @@
+from abc import ABC, abstractmethod
+from os import environ as env
+
 from sqlalchemy import MetaData, Table, create_engine
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.sql.functions import concat
 
-from .constants import BAD_REQUEST, EXCLUDED_FROM_DOCUMENTS, SUCCESS_REQUEST
+from .constants import SUCCESS_REQUEST
 
 
-class Controller:
+class Controller(ABC):
     session = None
     meta = None
 
-    def __init__(self, uri):
-        engine = create_engine(uri)
+    def __init__(self):
+        engine = create_engine(env['DB_URI'])
         DBSession = sessionmaker(bind=engine)
         self.meta = MetaData(engine)
         self.session = DBSession()
 
-    @staticmethod
-    def response(data, status=SUCCESS_REQUEST):
+    def response(self, data, status=SUCCESS_REQUEST):
         ok = status < 400
         _return = {'ok': ok}
         if ok:
             _return['data'] = data
         else:
             _return |= data
+        self.terminate()
         return _return, status
 
     def query(self, name, params=None, foreign_fields=None):
@@ -46,173 +48,18 @@ class Controller:
                 .filter(*aslike)
             return query, table
         except InvalidRequestError as e:
-            return {
-                       'error': True,
-                       'code': 'invalid_query',
-                       'message': str(e)
-                   }, None
-
-    def get_expedientes(self, params):
-        trd_dependencia = Table('trd_dependencia', self.meta, autoload=True)
-        trd_serie = Table('trd_serie', self.meta, autoload=True)
-        trd_subserie = Table('trd_subserie', self.meta, autoload=True)
-        usuarios = Table('usuarios', self.meta, autoload=True)
-        pasdict = params.to_dict()
-        query, table = self.query(
-            'expedientes',
-            pasdict,
-            [
-                concat(
-                    trd_dependencia.c.Cod,
-                    ' - ',
-                    trd_dependencia.c.Nombre
-                ).label('Dependencia'),
-                concat(
-                    trd_serie.c.Cod,
-                    ' - ',
-                    trd_serie.c.Nombre
-                ).label('Serie'),
-                concat(
-                    trd_subserie.c.Cod,
-                    ' - ',
-                    trd_subserie.c.Nombre
-                ).label('SubSerie'),
-                usuarios.c.Nombre.label('Usuario')
-            ]
-        )
-        if type(query) == dict and query.get('error'):
-            return query
-
-        result = query \
-            .join(
-                trd_dependencia,
-                trd_dependencia.c.id == table.c.Dependencia,
-                isouter=True
-            ) \
-            .join(
-                trd_serie,
-                trd_serie.c.id == table.c.Serie,
-                isouter=True
-            ) \
-            .join(
-                trd_subserie,
-                trd_subserie.c.id == table.c.SubSerie,
-                isouter=True
-            ) \
-            .join(
-                usuarios,
-                usuarios.c.id == table.c.Usuario,
-                isouter=True
+            return (
+                {'error': True, 'code': 'invalid_query', 'message': str(e)},
+                None
             )
-        return self.response(self.serialize(result))
 
-    def get_documentos(self, params):
-        params_dict = params.to_dict()
-        if 'Asunto' in params_dict:
-            params_dict['%Asunto'] = params_dict.pop('Asunto')
-        result, table = self.query('documentos', params_dict)
-        if type(result) == dict and result.get('error'):
-            return result
-        records = []
-        for row in result:
-            field = dict(row)
-            for key in EXCLUDED_FROM_DOCUMENTS:
-                del field[key]
-            tipodoc = field.get('TipoDoc')
-            if tipodoc != "9":
-                tipodoc_res, _ = self.query('trd_tipodoc', {'Cod': tipodoc})
-                tipodoc_row = dict(tipodoc_res.first())
-                field['TipoDoc'] = f"{tipodoc_row['Cod']} - {tipodoc_row['Nombre']} "
-            records.append(dict(field))
-        return self.response(records)
+    @abstractmethod
+    def get(self):
+        pass
 
-    def get_dependencias(self):
-        query, table = self.query('trd_dependencia')
-        rows = self.serialize(query)
-        result = []
-        for row in rows:
-            result.append({
-                'id': row['id'],
-                'codigo': row['Cod'],
-                'nombre': row['Nombre']
-            })
-        return self.response(result)
-
-    def get_series(self, params):
-        dependencia = params.get('dependencia')
-        if not dependencia:
-            return self.response(
-                {'message': 'Dependencia no especificada.'},
-                BAD_REQUEST
-            )
-        query, table = self.query(
-            'trd_serie',
-            {'Dependencia': dependencia}
-        )
-        rows = self.serialize(query)
-        result = []
-        for row in rows:
-            result.append({
-                'id': row['id'],
-                'codigo': row['Cod'],
-                'nombre': row['Nombre']
-            })
-        return self.response(result)
-
-    def get_subseries(self, params):
-        clause = {}
-        dependencia = params.get('dependencia')
-        serie = params.get('serie')
-        if dependencia:
-            clause['Dependencia'] = dependencia
-        if serie:
-            clause['Serie'] = serie
-        if len(clause) == 0:
-            return self.response({
-                'message': 'No se ha especificado dependencia y/o serie.'
-            })
-        query, _ = self.query('trd_subserie', clause)
-        rows = self.serialize(query)
-        result = []
-        for row in rows:
-            result.append({
-                'id': row['id'],
-                'codigo': row['Cod'],
-                'nombre': row['Nombre']
-            })
-        return self.response(result)
+    def terminate(self):
+        self.session.close()
 
     @staticmethod
     def serialize(result):
         return [dict(row) for row in result]
-
-    def get_tiposdoc(self, params):
-        clause = {}
-        dependencia = params.get('dependencia')
-        serie = params.get('serie')
-        subserie = params.get('subserie')
-        if len(clause) == 0:
-            return self.response({
-                'message': 'No se ha especificado dependencia y/o serie y/o '
-                           'subserie. '
-            })
-        if dependencia:
-            clause['Dependencia'] = dependencia
-        if serie:
-            clause['Serie'] = serie
-        if subserie:
-            clause['Subserie'] = subserie
-        query, _ = self.query('trd_tipodoc', clause)
-        rows = self.serialize(query)
-        result = []
-        for row in rows:
-            result.append({'codigo': row['Cod'], 'nombre': row['Nombre']})
-        return self.response(result)
-
-    def get_usuarios(self):
-        query, _ = self.query('usuarios')
-        rows = self.serialize(query)
-        result = []
-        for row in rows:
-            result.append({'id': row['id'], 'nombre': row['Nombre']})
-        return self.response(result)
