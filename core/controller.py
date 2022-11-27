@@ -1,8 +1,9 @@
+from sqlalchemy import MetaData, Table, create_engine
+from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.functions import concat
-from sqlalchemy import create_engine, MetaData, Table
-from sqlalchemy.exc import InvalidRequestError
-from .constants import EXCLUDED_FROM_DOCUMENTS, SUCCESS_REQUEST, BAD_REQUEST
+
+from .constants import BAD_REQUEST, EXCLUDED_FROM_DOCUMENTS, SUCCESS_REQUEST
 
 
 class Controller:
@@ -15,10 +16,8 @@ class Controller:
         self.meta = MetaData(engine)
         self.session = DBSession()
 
-    def serialize(self, result):
-        return [dict(row) for row in result]
-
-    def response(self, data, status=SUCCESS_REQUEST):
+    @staticmethod
+    def response(data, status=SUCCESS_REQUEST):
         ok = status < 400
         _return = {'ok': ok}
         if ok:
@@ -27,7 +26,11 @@ class Controller:
             _return |= data
         return _return, status
 
-    def query(self, name, params={}, foreign_fields=[]):
+    def query(self, name, params=None, foreign_fields=None):
+        if foreign_fields is None:
+            foreign_fields = []
+        if params is None:
+            params = {}
         try:
             table = Table(name, self.meta, autoload=True)
             params_copy = params.copy()
@@ -82,25 +85,25 @@ class Controller:
 
         result = query \
             .join(
-            trd_dependencia,
-            trd_dependencia.c.id == table.c.Dependencia,
-            isouter=True
-        ) \
+                trd_dependencia,
+                trd_dependencia.c.id == table.c.Dependencia,
+                isouter=True
+            ) \
             .join(
-            trd_serie,
-            trd_serie.c.id == table.c.Serie,
-            isouter=True
-        ) \
+                trd_serie,
+                trd_serie.c.id == table.c.Serie,
+                isouter=True
+            ) \
             .join(
-            trd_subserie,
-            trd_subserie.c.id == table.c.SubSerie,
-            isouter=True
-        ) \
+                trd_subserie,
+                trd_subserie.c.id == table.c.SubSerie,
+                isouter=True
+            ) \
             .join(
-            usuarios,
-            usuarios.c.id == table.c.Usuario,
-            isouter=True
-        )
+                usuarios,
+                usuarios.c.id == table.c.Usuario,
+                isouter=True
+            )
         return self.response(self.serialize(result))
 
     def get_documentos(self, params):
@@ -119,8 +122,7 @@ class Controller:
             if tipodoc != "9":
                 tipodoc_res, _ = self.query('trd_tipodoc', {'Cod': tipodoc})
                 tipodoc_row = dict(tipodoc_res.first())
-                field[
-                    'TipoDoc'] = f"{tipodoc_row['Cod']} - {tipodoc_row['Nombre']}"
+                field['TipoDoc'] = f"{tipodoc_row['Cod']} - {tipodoc_row['Nombre']} "
             records.append(dict(field))
         return self.response(records)
 
@@ -180,6 +182,10 @@ class Controller:
             })
         return self.response(result)
 
+    @staticmethod
+    def serialize(result):
+        return [dict(row) for row in result]
+
     def get_tiposdoc(self, params):
         clause = {}
         dependencia = params.get('dependencia')
@@ -187,7 +193,8 @@ class Controller:
         subserie = params.get('subserie')
         if len(clause) == 0:
             return self.response({
-                'message': 'No se ha especificado dependencia y/o serie y/o subserie.'
+                'message': 'No se ha especificado dependencia y/o serie y/o '
+                           'subserie. '
             })
         if dependencia:
             clause['Dependencia'] = dependencia
