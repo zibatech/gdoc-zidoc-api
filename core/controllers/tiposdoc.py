@@ -14,13 +14,14 @@ class TiposDocController(Controller):
         dependencia = params.get('dependencia')
         serie = params.get('serie')
         subserie = params.get('subserie')
+        clause = {}
         if dependencia:
-            params['Dependencia'] = dependencia
+            clause['Dependencia'] = dependencia
         if serie:
-            params['Serie'] = serie
+            clause['Serie'] = serie
         if subserie:
-            params['Subserie'] = subserie
-        query, _ = self.query('trd_tipodoc', params)
+            clause['Subserie'] = subserie
+        query, _ = self.query('trd_tipodoc', clause)
         rows = self.serialize(query)
         result = []
         for row in rows:
